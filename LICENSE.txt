@@ -1,0 +1,17 @@
+Copyright (c) 2025 Vladislav Manoilov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and distribute the Software for non-commercial purposes, subject to the following conditions:
+
+1. Attribution must be provided to the original author in any derivative works, documentation, or public mention of the Software. The following notice must be included:
+
+   "WinBridgeAgent was originally created by Vladislav Manoilov (https://github.com/vmanoilov)."
+
+2. Commercial use of the Software — including incorporation into a paid product, SaaS offering, proprietary system, or any activity resulting in financial gain — requires a separate commercial license agreement with the author.
+
+3. Redistribution of the Software in modified or unmodified form must retain this license file and the above attribution notice.
+
+4. The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.
+
+5. The author reserves the right to deny or revoke commercial use for entities who violate these terms.
+
+For commercial licensing, please contact: vlad [at] gmail [dot] com (use subject: "WinBridgeAgent Commercial License") or open an issue on the GitHub repository.

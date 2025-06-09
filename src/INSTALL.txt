@@ -1,0 +1,199 @@
+# WinBridgeAgent Installation and Usage Guide
+
+## Part of WinBridgeAgent (c) 2025 Vladislav Manoilov
+
+This document provides instructions on how to build, install, configure, and run the WinBridgeAgent Windows Service.
+
+## 1. Prerequisites
+
+- .NET 8 SDK (for building from source)
+- Windows Operating System (for running the service)
+
+## 2. Building the Service
+
+The service is designed to be built as a self-contained executable. This means it includes all necessary .NET runtime components and does not require .NET to be pre-installed on the target machine where the service will run (though the SDK is needed for the build process itself).
+
+1.  **Open a terminal or command prompt.**
+2.  **Navigate to the root directory of the WinBridgeAgent solution** (where `WinBridgeAgent.sln` is located).
+3.  **Run the following dotnet CLI command to publish the service:**
+
+    ```bash
+    dotnet publish -c Release -r win-x64 --self-contained true -o ./publish_output
+    ```
+
+    -   `-c Release`: Builds the project in Release configuration.
+    -   `-r win-x64`: Targets the Windows 64-bit platform.
+    -   `--self-contained true`: Creates a self-contained deployment that includes the .NET runtime.
+    -   `-o ./publish_output`: Specifies the output directory for the published files. You can change `publish_output` to your preferred directory name.
+
+## 3. Output Structure
+
+After a successful build, the `publish_output` directory (or your specified output directory) will contain:
+
+-   `WinBridgeAgent.exe`: The main executable for the Windows service.
+-   Various `.dll` files: Dependencies required by the service, including .NET runtime components.
+-   `appsettings.json`: The configuration file for the service. You **must** review and customize this file before starting the service.
+-   Other supporting files (e.g., `.pdb` for debugging if not stripped, etc.).
+
+## 4. Configuration (`appsettings.json`)
+
+Before installing and starting the service, you **must** configure `appsettings.json` located in the output directory. Pay close attention to the following settings:
+
+```json
+{
+  "Service": {
+    "RootFolder": "C:\\BridgeRoot", // IMPORTANT: Change to the actual sandboxed folder path
+    "MaxFileSize": 104857600,      // Max file size in bytes (default 100MB)
+    "AllowedExtensions": [ "*" ]   // Allowed file extensions (e.g., ["txt", "log"]). "*" allows all.
+  },
+  "Security": {
+    "TokenValidityMinutes": 60,    // How long generated tokens are valid
+    "RequireAuthentication": true  // Set to false to disable token authentication (not recommended for production)
+  },
+  "Logging": {
+    "Directory": "C:\\BridgeLogs", // IMPORTANT: Change to the desired log directory path
+    "RetentionDays": 30,           // How long to keep log files
+    "MinimumLevel": "Information"  // Logging level (Verbose, Debug, Information, Warning, Error, Fatal)
+  }
+}
+```
+
+**Key Configuration Points:**
+
+-   **`Service:RootFolder`**: This is the most critical setting. It defines the root directory that WinBridgeAgent will manage. Ensure this path exists and the service account (see section 5.2) will have appropriate permissions (Read, Write, Delete, List) for this folder and its subcontents.
+-   **`Logging:Directory`**: Specify the directory where log files will be stored. Ensure this path exists and the service account has write permissions.
+-   **`Security:RequireAuthentication`**: It is strongly recommended to keep this `true` for any production or sensitive environment.
+
+## 5. Installing and Managing the Service (PowerShell)
+
+The following PowerShell commands can be used to install, start, stop, and uninstall the WinBridgeAgent service. Run these commands as an **Administrator**.
+
+**Variables (set these first):**
+
+```powershell
+$ServiceName = "WinBridgeAgent"
+$DisplayName = "WinBridge Agent Service"
+$Description = "Securely exposes file operations over named pipes. (c) 2025 Vladislav Manoilov"
+# IMPORTANT: Update this path to the location of WinBridgeAgent.exe in your publish_output directory
+$ServicePath = "C:\path\to\your\publish_output\WinBridgeAgent.exe" 
+```
+
+### 5.1. Create and Install the Service
+
+```powershell
+# Ensure the $ServicePath is correct and points to the WinBridgeAgent.exe
+New-Service -Name $ServiceName -BinaryPathName $ServicePath -DisplayName $DisplayName -Description $Description -StartupType Automatic
+
+# Optional: Set recovery options (e.g., restart on failure)
+sc.exe failure $ServiceName reset= 60 actions= restart/5000/restart/5000/restart/5000
+
+Write-Host "Service '$ServiceName' installed. Configure appsettings.json in '$((Get-Item $ServicePath).DirectoryName)' before starting."
+```
+
+### 5.2. Service Account (Important Security Note)
+
+By default, services created with `New-Service` often run as `LocalSystem`. While `LocalSystem` has extensive privileges, it might be more than necessary. For enhanced security, consider running the service under a less privileged account that has *only* the required permissions for:
+
+1.  The `Service:RootFolder` (Read, Write, Delete, List).
+2.  The `Logging:Directory` (Write).
+
+You can change the service account using the Services.msc console:
+1.  Open `Services.msc`.
+2.  Find "WinBridge Agent Service".
+3.  Right-click -> Properties -> Log On tab.
+4.  Select "This account" and provide credentials for a dedicated user account.
+
+### 5.3. Start the Service
+
+```powershell
+Start-Service -Name $ServiceName
+Get-Service -Name $ServiceName | Select-Object -Property Name, Status, DisplayName
+Write-Host "Service '$ServiceName' starting. Check logs in the configured Logging:Directory."
+```
+
+### 5.4. Stop the Service
+
+```powershell
+Stop-Service -Name $ServiceName
+Get-Service -Name $ServiceName | Select-Object -Property Name, Status, DisplayName
+Write-Host "Service '$ServiceName' stopped."
+```
+
+### 5.5. Uninstall the Service
+
+**Ensure the service is stopped before uninstalling.**
+
+```powershell
+# Stop the service if it's running
+if ((Get-Service -Name $ServiceName -ErrorAction SilentlyContinue).Status -eq 'Running') {
+    Stop-Service -Name $ServiceName
+    Write-Host "Waiting for service to stop..."
+    Start-Sleep -Seconds 5 # Give it a moment to stop
+}
+
+Remove-Service -Name $ServiceName
+Write-Host "Service '$ServiceName' uninstalled."
+```
+
+## 6. Verifying the Service
+
+1.  **Check Service Status**: Use `Get-Service -Name $ServiceName` in PowerShell or check `Services.msc`.
+2.  **Inspect Logs**: After starting the service, check the directory specified in `Logging:Directory` in `appsettings.json`. You should see JSON formatted log files (e.g., `WinBridgeAgent-YYYYMMDD.json`).
+    -   Look for the initial startup messages, including the license warning and the `ServiceStart` event log.
+    -   Example startup log entry:
+        `{"Event": "ServiceStart", "Origin": "WinBridgeAgent", "Author": "Vladislav Manoilov", "License": "NonCommercial"}`
+3.  **Test Named Pipe Communication**: Use a client application (you might need to develop a simple test client) to connect to the named pipe `\\.\pipe\WinBridgeAgentPipe` and send commands as per the defined JSON request/response structure.
+    -   First, request a token using the `GetToken` command.
+    -   Then, use the obtained token to perform file operations (CreateFile, ReadFile, ListFiles, DeleteFile).
+
+## 7. Client Interaction (Named Pipe)
+
+-   **Pipe Name**: `WinBridgeAgentPipe` (local pipe, so `\\.\pipe\WinBridgeAgentPipe`)
+-   **Communication**: JSON-based request/response.
+
+**Example Request (`GetToken`):**
+```json
+{
+  "Command": "GetToken"
+}
+```
+
+**Example Response (for `GetToken`):**
+```json
+{
+  "Success": true,
+  "ErrorMessage": null,
+  "Data": "YOUR_GENERATED_TOKEN_STRING"
+}
+```
+
+**Example Request (e.g., `ListFiles`):**
+```json
+{
+  "Token": "YOUR_GENERATED_TOKEN_STRING",
+  "Command": "ListFiles",
+  "RelativePath": "some_subfolder"
+}
+```
+
+**Example Response (for `ListFiles`):**
+```json
+{
+  "Success": true,
+  "ErrorMessage": null,
+  "Data": [
+    { "Name": "file1.txt", "Type": "File", "RelativePath": "some_subfolder/file1.txt" },
+    { "Name": "another_dir", "Type": "Directory", "RelativePath": "some_subfolder/another_dir" }
+  ]
+}
+```
+
+## 8. Code Protections & Licensing
+
+-   Attribution comments `// Part of WinBridgeAgent (c) 2025 Vladislav Manoilov` are included in main class files.
+-   Service startup logs include author and license information.
+-   A non-commercial license warning is printed to the console/logs on startup.
+-   Fingerprinted names like `SecurityTokenManagerVlad` and `Log.WinBridge.CreateAudit` are used as specified.
+
+This service is provided under a non-commercial license. For commercial use or terms, please contact vlad [at] gmail [dot] com.
+

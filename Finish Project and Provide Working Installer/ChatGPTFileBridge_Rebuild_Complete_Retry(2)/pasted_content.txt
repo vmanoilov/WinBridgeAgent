@@ -1,0 +1,126 @@
+Here’s the updated **Manus AI prompt**, now with **clear instructions at the end** to compile and produce a working, installable Windows Service executable:
+
+---
+
+You are a senior C# systems engineer.
+
+Your task is to build **WinBridgeAgent** — a secure Windows Service written in .NET Core 8 that enables controlled access to a local folder through named pipes. This bridge allows local tools (like LLMs or automation agents) to interact with files securely and under strict authorization.
+
+OBJECTIVE:
+Create a fully functional, production-ready Windows Service that exposes a file operations interface over named pipes, with:
+
+* Controlled folder access (sandboxed root)
+* Token-based authentication with expiration
+* Read, write, delete, and list file APIs
+* Structured Serilog logging in JSON format
+* Attribution, licensing checks, and code fingerprinting
+
+The result should be a self-contained Windows executable that runs as a service and is configurable via appsettings.json.
+
+CODE PROTECTIONS & LICENSE FINGERPRINTING (REQUIRED):
+
+1. Add this comment to all main classes:
+   // Part of WinBridgeAgent (c) 2025 Vladislav Manoilov
+
+2. Log this on service startup:
+   {
+   "Event": "ServiceStart",
+   "Origin": "WinBridgeAgent",
+   "Author": "Vladislav Manoilov",
+   "License": "NonCommercial"
+   }
+
+3. Print this warning at service start:
+   \[WinBridgeAgent] Non-commercial license. Contact vlad \[at] gmail \[dot] com for commercial terms.
+
+4. Use fingerprinted names like:
+   Log.WinBridge.CreateAudit
+   SecurityTokenManagerVlad
+
+ARCHITECTURE REQUIREMENTS:
+
+1. Service Host:
+
+* .NET Windows service using Microsoft.Extensions.Hosting
+* Loads appsettings.json
+* Registers all components via DI
+
+2. Named Pipe Server:
+
+* Uses System.IO.Pipes
+* Accepts JSON requests and returns JSON responses
+* Handles operations like CreateFile, ReadFile, DeleteFile, ListFiles
+* Validates token before each request
+
+3. File Operation Manager:
+
+* CreateFile(string relativePath, byte\[] content)
+* ReadFile(string relativePath)
+* DeleteFile(string relativePath)
+* ListFiles(string relativePath)
+* Enforces path safety and root containment
+
+4. Token System:
+
+* Generate and validate tokens with expiration (default 60 min)
+* Token settings configurable in appsettings.json
+* Tokens required for every operation
+
+5. Security Layer:
+
+* Prevent path traversal attacks (e.g., ../)
+* Allow only specified file extensions (configured)
+* Full operation-level access validation
+
+6. Logging:
+
+* Use Serilog
+* Log all operations to JSON files in BridgeLogs/
+* Use rotating logs (retention days configurable)
+
+CONFIGURATION EXAMPLE (appsettings.json):
+
+{
+"Service": {
+"RootFolder": "C:\BridgeRoot",
+"MaxFileSize": 104857600,
+"AllowedExtensions": \[ "\*" ]
+},
+"Security": {
+"TokenValidityMinutes": 60,
+"RequireAuthentication": true
+},
+"Logging": {
+"Directory": "C:\BridgeLogs",
+"RetentionDays": 30
+}
+}
+
+OUTPUT REQUIREMENTS:
+
+* Fully working Windows service
+* Compiles under .NET Core 8
+* Uses proper folder structure: Core, Managers, Security, Infrastructure
+* Includes all .csproj and .sln files
+* Includes example appsettings.json
+* Includes attribution in logs and class headers
+* Fully runnable, with install instructions
+
+COMPILATION AND INSTALLATION INSTRUCTIONS (MUST BE INCLUDED IN OUTPUT):
+
+1. Use `dotnet publish -c Release -r win-x64 --self-contained true` to build a self-contained executable.
+2. Output must include:
+
+   * Executable `.exe` file
+   * All necessary `.dll` dependencies
+   * `appsettings.json` in the output directory
+3. Provide a PowerShell script or command instructions to:
+
+   * Register the executable as a Windows service (`sc create` or `New-Service`)
+   * Start, stop, and uninstall the service
+4. Verify it works on a clean Windows machine without needing .NET installed (self-contained).
+5. Output structure must be portable and ready for deployment.
+
+Produce the full system in one pass. No placeholders or stubs. The code must be immediately usable and secure.
+
+Start now.

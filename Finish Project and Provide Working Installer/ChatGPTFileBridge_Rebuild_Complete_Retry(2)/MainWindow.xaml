@@ -1,0 +1,211 @@
+<Window x:Class="WinBridgeAgentControlPanel.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinBridgeAgentControlPanel"
+        mc:Ignorable="d"
+        Title="WinBridgeAgent Control Panel (c) 2025 Vladislav Manoilov"
+        Height="600" Width="800"
+        MinHeight="450" MinWidth="700">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Dashboard">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel Margin="10">
+                        <GroupBox Header="Service Status" Padding="5">
+                            <StackPanel>
+                                <TextBlock Name="ServiceStatusText" Text="Status: Unknown" FontWeight="Bold" Margin="5"/>
+                                <WrapPanel Margin="5">
+                                    <Button Name="StartServiceButton" Content="Start Service" Margin="0,0,5,0" Padding="10,5"/>
+                                    <Button Name="StopServiceButton" Content="Stop Service" Margin="0,0,5,0" Padding="10,5"/>
+                                    <Button Name="RestartServiceButton" Content="Restart Service" Padding="10,5"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Current Token" Padding="5" Margin="0,10,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Token:" Margin="5"/>
+                                <TextBox Name="CurrentTokenText" IsReadOnly="True" TextWrapping="Wrap" Margin="5" MinHeight="40" VerticalScrollBarVisibility="Auto"/>
+                                <TextBlock Name="TokenExpiryText" Text="Expires: N/A" Margin="5"/>
+                                <Button Name="CopyTokenButtonDashboard" Content="Copy Token" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Log Files" Padding="5" Margin="0,10,0,0">
+                            <Button Name="OpenLogsFolderButton" Content="Open Logs Folder" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                        </GroupBox>
+                        
+                        <Button Name="RefreshDashboardButton" Content="Refresh Dashboard" Margin="5,20,5,5" Padding="10,5" HorizontalAlignment="Left"/>
+
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Configuration">
+                <Grid Background="#FFE5E5E5">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="10">
+                            <GroupBox Header="Service Settings" Padding="5">
+                                <StackPanel>
+                                    <TextBlock Text="Root Folder:" Margin="5"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="RootFolderText" Margin="5,0,5,5" Grid.Column="0" VerticalContentAlignment="Center"/>
+                                        <Button Name="BrowseRootFolderButton" Content="Browse..." Margin="0,0,5,5" Grid.Column="1" Padding="10,2"/>
+                                    </Grid>
+                                    <TextBlock Text="Max File Size (MB):" Margin="5"/>
+                                    <TextBox Name="MaxFileSizeText" Margin="5,0,5,5"/>
+                                    <TextBlock Text="Allowed Extensions (comma-separated, e.g., txt,log,* for all):" Margin="5"/>
+                                    <TextBox Name="AllowedExtensionsText" Margin="5,0,5,5"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Security Settings" Padding="5" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Token Validity (minutes):" Margin="5"/>
+                                    <TextBox Name="TokenValidityText" Margin="5,0,5,5"/>
+                                    <CheckBox Name="RequireAuthenticationCheck" Content="Require Authentication" Margin="5"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Logging Settings" Padding="5" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Log Directory:" Margin="5"/>
+                                     <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="LogDirectoryText" Margin="5,0,5,5" Grid.Column="0" VerticalContentAlignment="Center"/>
+                                        <Button Name="BrowseLogDirectoryButton" Content="Browse..." Margin="0,0,5,5" Grid.Column="1" Padding="10,2"/>
+                                    </Grid>
+                                    <TextBlock Text="Log Retention (days):" Margin="5"/>
+                                    <TextBox Name="LogRetentionText" Margin="5,0,5,5"/>
+                                    <TextBlock Text="Minimum Log Level:" Margin="5"/>
+                                    <ComboBox Name="LogLevelCombo" Margin="5,0,5,5">
+                                        <ComboBoxItem Content="Verbose"/>
+                                        <ComboBoxItem Content="Debug"/>
+                                        <ComboBoxItem Content="Information" IsSelected="True"/>
+                                        <ComboBoxItem Content="Warning"/>
+                                        <ComboBoxItem Content="Error"/>
+                                        <ComboBoxItem Content="Fatal"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </GroupBox>
+                            <WrapPanel HorizontalAlignment="Right" Margin="5,20,5,5">
+                                <Button Name="LoadConfigButton" Content="Reload Current Config" Margin="0,0,5,0" Padding="10,5"/>
+                                <Button Name="SaveConfigButton" Content="Save &amp; Apply Configuration" Padding="10,5" FontWeight="Bold"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Tokens">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel Margin="10">
+                        <Button Name="GenerateTokenButton" Content="Generate New Token" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Generated Token:" Margin="5,10,5,5"/>
+                        <TextBox Name="GeneratedTokenText" IsReadOnly="True" TextWrapping="Wrap" Margin="5" MinHeight="60" VerticalScrollBarVisibility="Auto"/>
+                        <TextBlock Name="GeneratedTokenExpiryText" Text="Expires: N/A" Margin="5"/>
+                        <Button Name="CopyTokenButtonTokensTab" Content="Copy Token to Clipboard" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                        <!-- Revoke Token functionality might be complex if it requires service-side changes -->
+                        <!-- <Button Name="RevokeTokenButton" Content="Revoke This Token (If Supported)" Margin="5" Padding="10,5" HorizontalAlignment="Left" IsEnabled="False"/> -->
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Logs Viewer">
+                <Grid Background="#FFE5E5E5">
+                    <DockPanel Margin="10">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,5">
+                            <TextBlock Text="Filter by Level:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <ComboBox Name="LogFilterLevelCombo" Width="120" Margin="0,0,10,0">
+                                <ComboBoxItem Content="All" IsSelected="True"/>
+                                <ComboBoxItem Content="Verbose"/>
+                                <ComboBoxItem Content="Debug"/>
+                                <ComboBoxItem Content="Information"/>
+                                <ComboBoxItem Content="Warning"/>
+                                <ComboBoxItem Content="Error"/>
+                                <ComboBoxItem Content="Fatal"/>
+                            </ComboBox>
+                            <TextBlock Text="Filter by Date:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <DatePicker Name="LogFilterDate" Width="120" Margin="0,0,10,0"/>
+                            <Button Name="ApplyLogFilterButton" Content="Apply Filter" Margin="0,0,10,0" Padding="10,2"/>
+                            <Button Name="ExportLogsButton" Content="Export Visible Logs" Padding="10,2"/>
+                        </StackPanel>
+                        <ListView Name="LogsListView">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Timestamp" Width="150" DisplayMemberBinding="{Binding Timestamp}"/>
+                                    <GridViewColumn Header="Level" Width="80" DisplayMemberBinding="{Binding Level}"/>
+                                    <GridViewColumn Header="Message" Width="450" DisplayMemberBinding="{Binding Message}"/>
+                                    <!-- Add more columns for structured log data if available -->
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Service Tools">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel Margin="10">
+                        <GroupBox Header="Service Installation" Padding="5">
+                            <StackPanel>
+                                <TextBlock Text="Service Executable Path (WinBridgeAgent.exe):" Margin="5"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Name="ServiceExecutablePathText" Margin="5,0,5,5" Grid.Column="0" VerticalContentAlignment="Center"/>
+                                    <Button Name="BrowseServiceExecutableButton" Content="Browse..." Margin="0,0,5,5" Grid.Column="1" Padding="10,2"/>
+                                </Grid>
+                                <WrapPanel Margin="5">
+                                    <Button Name="InstallServiceButton" Content="Install Service" Margin="0,0,5,0" Padding="10,5"/>
+                                    <Button Name="UninstallServiceButton" Content="Uninstall Service" Padding="10,5"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Service Startup" Padding="5" Margin="0,10,0,0">
+                             <ComboBox Name="ServiceStartupTypeCombo" Margin="5">
+                                <ComboBoxItem Content="Automatic" Tag="Automatic"/>
+                                <ComboBoxItem Content="Automatic (Delayed Start)" Tag="AutomaticDelayedStart"/>
+                                <ComboBoxItem Content="Manual" Tag="Manual"/>
+                                <ComboBoxItem Content="Disabled" Tag="Disabled"/>
+                            </ComboBox>
+                            <Button Name="SetStartupTypeButton" Content="Set Startup Type" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                        </GroupBox>
+                        <GroupBox Header="Service Details" Padding="5" Margin="0,10,0,0">
+                            <Button Name="ShowServiceDetailsButton" Content="Show Full Service Status (sc query)" Margin="5" Padding="10,5" HorizontalAlignment="Left"/>
+                            <TextBox Name="ServiceDetailsText" IsReadOnly="True" TextWrapping="Wrap" Margin="5" MinHeight="80" VerticalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+                        </GroupBox>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="About">
+                <Grid Background="#FFE5E5E5">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="10">
+                            <GroupBox Header="License Information" Padding="5">
+                                <TextBox Name="LicenseText" IsReadOnly="True" TextWrapping="WrapWithOverflow" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" MinHeight="150" MaxHeight="250" Margin="5" Text="Loading LICENSE.txt..."/>
+                            </GroupBox>
+                            <GroupBox Header="Application Information" Padding="5" Margin="0,10,0,0">
+                                <StackPanel Margin="5">
+                                    <TextBlock Name="AttributionText" Text="Part of WinBridgeAgent (c) 2025 Vladislav Manoilov" FontWeight="Bold"/>
+                                    <TextBlock Name="VersionInfoText" Text="Control Panel Version: 0.1.0 (Service Version: N/A)" Margin="0,5,0,0"/>
+                                    <TextBlock Text="For commercial licensing or inquiries, please contact:" Margin="0,10,0,0"/>
+                                    <TextBlock Name="ContactEmailText" Text="vlad [at] gmail [dot] com" Margin="0,0,0,5"/>
+                                    <Button Name="CopyEmailButton" Content="Copy Email to Clipboard" Padding="10,5" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+

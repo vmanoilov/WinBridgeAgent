@@ -1,0 +1,10 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Solution file for ChatGPT File Bridge
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGPTFileBridge.API", "src\ChatGPTFileBridge.API\ChatGPTFileBridge.API.csproj", "{12345678-1234-1234-1234-1234567890AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGPTFileBridge.UI", "src\ChatGPTFileBridge.UI\ChatGPTFileBridge.UI.csproj", "{23456789-2345-2345-2345-2345678901BC}"
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+EndGlobal
